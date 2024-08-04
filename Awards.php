@@ -7,13 +7,42 @@ class Awards
     protected $oscars_by_year = [];
     protected $movies_with_both_oscars = [];
 
-    public function __constructor($actress_file, $actors_file)
+    public function __construct($actors_file, $actress_file)
     {
         $this->actors_with_oscar = $this->csvToFormattedArray($actors_file);
         $this->actresses_with_oscar = $this->csvToFormattedArray($actress_file);
 
         $this->setOscarsByYear();
         $this->setMoviesWithBothOscars();
+    }
+
+    private function csvToFormattedArray($csv)
+    {
+        //transforming csv into array of arrays
+        $initial_array = array_map('str_getcsv', file($csv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+
+        //removing [0] element (table head)
+        array_shift($initial_array);
+
+        //head to map onto
+        $head = ['year', 'age', 'name', 'movie'];
+
+        $final_array = [];
+
+        foreach ($initial_array as $key => $subarray) {
+            //removing 'index' key-value pair
+            array_shift($subarray);
+
+            //removing white spaces
+            $trimmed_subarray = array_map(function ($value) {
+                return trim($value);
+            }, $subarray);
+
+            //renaming numbered keys to names of columns
+            $final_array[$key] = array_combine($head, $trimmed_subarray);
+        }
+
+        return $final_array;
     }
 
     private function setOscarsByYear()
@@ -42,38 +71,23 @@ class Awards
     private function setMoviesWithBothOscars()
     {
         foreach ($this->actors_with_oscar as $actor_data) {
-            $movies_actors[trim($actor_data['movie'])] = [
-                'name' => $actor_data['name'],
-            ];
+            $movies_actors[$actor_data['movie']] = $actor_data['name'];
         }
 
-        foreach ($this->actresses_with_oscar as $movie_name => $details_array) {
-            if (isset($movies_actors[$movie_name])) {
-                $movies[$movie_name] = [
-                    'year' => $details_array['year'],
-                    'actor' => $movies_actors[$movie_name]['name'],
-                    'actress' => $details_array['name']
+        foreach ($this->actresses_with_oscar as $actress_data) {
+            $movie_title = $actress_data['movie'];
+            if (isset($movies_actors[$movie_title])) {
+                $movies[$movie_title] = [
+                    'year' => $actress_data['year'],
+                    'actor' => $movies_actors[$movie_title],
+                    'actress' => $actress_data['name']
                 ];
             }
         }
 
-        $this->movies_with_both_oscars = ksort($movies);
-    }
+        ksort($movies);
 
-    private function csvToFormattedArray($csv)
-    {
-        //transforming csv into array of arrays
-        $array = array_map('str_getcsv', file($csv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
-
-        //renaming keys of subarrays according to head
-        array_walk($array, function (&$ary) use ($array) {
-            $head = array_map('strtolower', $array[0]);
-            $ary = array_combine($head, $ary);
-        });
-
-        //removing [0] element
-        array_shift($array);
-        return $array;
+        $this->movies_with_both_oscars = $movies;
     }
 
     public function getOscarsByYearData()
