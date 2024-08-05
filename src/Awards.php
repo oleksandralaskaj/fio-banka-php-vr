@@ -59,10 +59,10 @@ class Awards
 
     private function setOscarsByYear()
     {
-        $data = [];
+        $oscars_by_year = [];
 
         foreach ($this->actors_with_oscar as $actor_data) {
-            $data[$actor_data['year']]['actor'] = [
+            $oscars_by_year[$actor_data['year']]['actor'] = [
                 'name' => $actor_data['name'],
                 'age' => $actor_data['age'],
                 'movie' => $actor_data['movie'],
@@ -70,14 +70,14 @@ class Awards
         }
 
         foreach ($this->actresses_with_oscar as $actress_data) {
-            $data[$actress_data['year']]['actress'] = [
+            $oscars_by_year[$actress_data['year']]['actress'] = [
                 'name' => $actress_data['name'],
                 'age' => $actress_data['age'],
                 'movie' => $actress_data['movie'],
             ];
         }
 
-        $this->oscars_by_year = $data;
+        $this->oscars_by_year = $oscars_by_year;
     }
 
     private function setMoviesWithBothOscars()
@@ -85,6 +85,8 @@ class Awards
         foreach ($this->actors_with_oscar as $actor_data) {
             $movies_actors[$actor_data['movie']] = $actor_data['name'];
         }
+
+        $movies = [];
 
         foreach ($this->actresses_with_oscar as $actress_data) {
             $movie_title = $actress_data['movie'];
@@ -110,15 +112,5 @@ class Awards
     public function getMoviesWithBothOscarsData()
     {
         return $this->movies_with_both_oscars;
-    }
-
-    public function getActors()
-    {
-        return $this->actors_with_oscar;
-    }
-
-    public function getActresses()
-    {
-        return $this->actresses_with_oscar;
     }
 }
