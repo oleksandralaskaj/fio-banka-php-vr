@@ -22,27 +22,39 @@ class Awards
         $initial_array = array_map('str_getcsv', file($csv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
 
         //removing [0] element (table head)
-        array_shift($initial_array);
+        $provided_data_head = array_shift($initial_array);
 
-        //head to map onto
-        $head = ['year', 'age', 'name', 'movie'];
+        //in case table head is not valid for further data depiction
+        if (!$this->validateDatasetFormat($provided_data_head)) {
+            session_start();
+            $_SESSION['message'] = "Formát poskytnutých dat je nevyhovující, zvolte jiné soubory.";
+            header('Location: index.php');
+        } else {
+            //head to map onto
+            $head = ['year', 'age', 'name', 'movie'];
 
-        $final_array = [];
+            $final_array = [];
 
-        foreach ($initial_array as $key => $subarray) {
-            //removing 'index' key-value pair
-            array_shift($subarray);
+            foreach ($initial_array as $key => $subarray) {
+                //removing 'index' key-value pair
+                array_shift($subarray);
 
-            //removing white spaces
-            $trimmed_subarray = array_map(function ($value) {
-                return trim($value);
-            }, $subarray);
+                //removing white spaces
+                $trimmed_subarray = array_map(function ($value) {
+                    return trim($value);
+                }, $subarray);
 
-            //renaming numbered keys to names of columns
-            $final_array[$key] = array_combine($head, $trimmed_subarray);
+                //renaming numbered keys to names of columns
+                $final_array[$key] = array_combine($head, $trimmed_subarray);
+            }
+            return $final_array;
         }
+    }
 
-        return $final_array;
+    private function validateDatasetFormat($provided_data_head)
+    {
+        $control_data_head = ['Index', 'Year', 'Name', 'Movie'];
+        return array_intersect($control_data_head, $provided_data_head) == $control_data_head;
     }
 
     private function setOscarsByYear()
