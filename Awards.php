@@ -2,10 +2,10 @@
 
 class Awards
 {
-    protected $actors_with_oscar = [];
-    protected $actresses_with_oscar = [];
-    protected $oscars_by_year = [];
-    protected $movies_with_both_oscars = [];
+    private $actors_with_oscar = [];
+    private $actresses_with_oscar = [];
+    private $oscars_by_year = [];
+    private $movies_with_both_oscars = [];
 
     public function __construct($actors_file, $actress_file)
     {
@@ -98,5 +98,15 @@ class Awards
     public function getMoviesWithBothOscarsData()
     {
         return $this->movies_with_both_oscars;
+    }
+
+    public function getActors()
+    {
+        return $this->actors_with_oscar;
+    }
+
+    public function getActresses()
+    {
+        return $this->actresses_with_oscar;
     }
 }
